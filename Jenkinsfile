@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // 如果需要设置环境变量，可以在这里定义
         BRANCH_NAME = 'main'
         NOTEBOOK_PATH = 'lab3.ipynb'  // 指定要运行的 notebook 文件路径
     }
@@ -42,8 +41,10 @@ pipeline {
 
         stage('Test') {
             steps {
-                // 这里可以添加测试步骤，如果适用的话
-                // 例如运行单元测试或其他验证过程
+                // 如果需要添加测试步骤，请在此处定义。
+                // 例如运行单元测试或其他验证过程。
+                // 如果当前没有测试，则可以保留为空步骤或注释掉此阶段。
+                echo 'No tests defined.'
             }
         }
     }
