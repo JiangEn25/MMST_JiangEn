@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent any  // 使用任何可用的 Jenkins Agent
 
     environment {
         BRANCH_NAME = 'main'
@@ -19,9 +19,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh """
-                # 更新 pip 并安装依赖项
-                pip3 install --upgrade pip
-                pip3 install -r requirements.txt
+                # 更新 pip 并安装依赖项（如果需要）
+                pip3 install --user --upgrade pip
+                pip3 install --user -r requirements.txt
                 """
             }
         }
