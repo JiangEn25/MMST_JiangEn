@@ -4,7 +4,6 @@ pipeline {
     environment {
         BRANCH_NAME = 'main'
         PYTHON_FILE_PATH = 'test.py'  // 指定要运行的 Python 文件路径
-        VENV_PATH = '/var/jenkins_home/venv'  // 定义虚拟环境路径
     }
 
     stages {
@@ -17,23 +16,12 @@ pipeline {
             }
         }
 
-        stage('Create Virtual Environment') {
-            steps {
-                sh """
-                if [ ! -d "${env.VENV_PATH}" ]; then
-                    python3 -m venv ${env.VENV_PATH}
-                fi
-                source ${env.VENV_PATH}/bin/activate
-                """
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 sh """
-                source ${env.VENV_PATH}/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
+                # 更新 pip 并安装依赖项
+                pip3 install --upgrade pip
+                pip3 install -r requirements.txt
                 """
             }
         }
@@ -44,8 +32,7 @@ pipeline {
                     echo "Executing Python script: ${env.PYTHON_FILE_PATH}"
                     try {
                         sh """
-                        source ${env.VENV_PATH}/bin/activate
-                        python ${env.PYTHON_FILE_PATH}
+                        python3 ${env.PYTHON_FILE_PATH}
                         """
                         echo "Successfully executed Python script: ${env.PYTHON_FILE_PATH}"
                     } catch (err) {
