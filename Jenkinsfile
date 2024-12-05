@@ -3,7 +3,8 @@ pipeline {
 
     environment {
         BRANCH_NAME = 'main'
-        NOTEBOOK_PATH = 'lab3.ipynb'  // 指定要运行的 notebook 文件路径
+        PYTHON_FILE_PATH = 'test.py'  // 指定要运行的 Python 文件路径
+        VENV_PATH = '/var/jenkins_home/venv'  // 定义虚拟环境路径
     }
 
     stages {
@@ -16,24 +17,39 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Create Virtual Environment') {
             steps {
-                // 假设有一个 requirements.txt 文件列出所有依赖项
-                sh 'pip install -r requirements.txt'
-                // 安装 nbconvert 用于转换或执行 notebook
-                sh 'pip install nbconvert'
+                sh """
+                if [ ! -d "${env.VENV_PATH}" ]; then
+                    python3 -m venv ${env.VENV_PATH}
+                fi
+                source ${env.VENV_PATH}/bin/activate
+                """
             }
         }
 
-        stage('Run Specific Jupyter Notebook') {
+        stage('Install Dependencies') {
+            steps {
+                sh """
+                source ${env.VENV_PATH}/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                """
+            }
+        }
+
+        stage('Run Python Script') {
             steps {
                 script {
-                    echo "Executing specific notebook: ${env.NOTEBOOK_PATH}"
+                    echo "Executing Python script: ${env.PYTHON_FILE_PATH}"
                     try {
-                        sh "jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=600 ${env.NOTEBOOK_PATH}"
-                        echo "Successfully executed notebook: ${env.NOTEBOOK_PATH}"
+                        sh """
+                        source ${env.VENV_PATH}/bin/activate
+                        python ${env.PYTHON_FILE_PATH}
+                        """
+                        echo "Successfully executed Python script: ${env.PYTHON_FILE_PATH}"
                     } catch (err) {
-                        error "Failed to execute notebook: ${env.NOTEBOOK_PATH}. Error: ${err.message}"
+                        error "Failed to execute Python script: ${env.PYTHON_FILE_PATH}. Error: ${err.message}"
                     }
                 }
             }
@@ -41,9 +57,6 @@ pipeline {
 
         stage('Test') {
             steps {
-                // 如果需要添加测试步骤，请在此处定义。
-                // 例如运行单元测试或其他验证过程。
-                // 如果当前没有测试，则可以保留为空步骤或注释掉此阶段。
                 echo 'No tests defined.'
             }
         }
@@ -54,10 +67,10 @@ pipeline {
             cleanWs() // 清理工作空间
         }
         success {
-            echo 'All specified notebooks executed successfully.'
+            echo 'Python script executed successfully.'
         }
         failure {
-            echo 'Failed to execute the specified notebook.'
+            echo 'Failed to execute the Python script.'
         }
     }
 }
